@@ -13,14 +13,21 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /node_modules/,
+                include: [
+                    path.resolve(__dirname, 'src'),
+                    path.resolve(__dirname, 'node_modules/firebase-admin')
+                ],
                 use: {
                     loader: 'babel-loader',
-                    options: {
-                        presets: ['env']
+                    query: {
+                        presets: ['env', 'es2015', 'react']
                     }
                 }
-            }
+            },
+            // {
+            //     test: /\.json$/,
+            //     loader: 'json-loader'
+            // }
         ]
     },
     plugins: [
@@ -32,5 +39,6 @@ module.exports = {
                 'NODE_ENV': JSON.stringify('production')
             }
         })
-    ]
+    ],
+    target: 'node'
 }

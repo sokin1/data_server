@@ -1,7 +1,7 @@
 var net = require('net')
 var admin = require('firebase-admin')
 
-var serviceAccount = require("./userinfo-7f8f9-firebase-adminsdk-ophcs-89dc3be3b4.json")
+var serviceAccount = require("../resources/userinfo-7f8f9-firebase-adminsdk-ophcs-89dc3be3b4.json")
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
