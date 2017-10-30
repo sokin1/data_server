@@ -23,11 +23,7 @@ module.exports = {
                         presets: ['env', 'es2015', 'react']
                     }
                 }
-            },
-            // {
-            //     test: /\.json$/,
-            //     loader: 'json-loader'
-            // }
+            }
         ]
     },
     plugins: [

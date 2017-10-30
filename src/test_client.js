@@ -1,4 +1,4 @@
-import encoder from './Encoder'
+const Crypto = require('./Crypto.js')
 const net = require('net')
 const md5 = require('md5')
 

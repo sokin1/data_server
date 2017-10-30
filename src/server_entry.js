@@ -1,3 +1,4 @@
+const Crypto = require('./Crypto.js')
 var net = require('net')
 var admin = require('firebase-admin')
 
@@ -32,27 +33,27 @@ var server = net.createServer(socket => {
     // uid is retrieved from auth-server
     // So, whenever it sends requests to db-server, it goes through auth-server first
     socket.on('data', data => {
-        var json_data = JSON.parse(decoder(data))
+        var json_data = JSON.parse(Crypto.decoder(data))
 
         if(json_data.action == 'GROUP') {
-            var rtn = handle_group_action(json_data.subaction, json_data.gid, json_data.uid, json_data.more)
-
-            socket.write(rtn)
+            handle_group_action(json_data.subaction, json_data.gid, json_data.uid, json_data.more, result => {
+                socket.write(result)
+            })
         } else if(json_data.action == 'POST') {
-            var rtn = handle_post_action(json_data.subaction, json_data.gid, json_data.uid, json_data.more)
-
-            socket.write(rtn)
+            handle_post_action(json_data.subaction, json_data.gid, json_data.uid, json_data.more, result => {
+                socket.write(result)
+            })
         } else if(json_data.action == 'USER') {
-            var rtn = handle_user_action(json_data.subaction, json_data.uid, json_data.more)
-
-            socket.write(rtn)
+            handle_user_action(json_data.subaction, json_data.uid, json_data.more, result => {
+                socket.write(result)    
+            })
         }
     })
 
     socket.pipe(socket)
 })
 
-function handle_group_action(subaction, gid, uid, detail) {
+function handle_group_action(subaction, gid, uid, detail, callback) {
     if(subaction == 'CREATE') {
         ref.child('group').child(gid).set({
             name: detail.name,
@@ -60,10 +61,49 @@ function handle_group_action(subaction, gid, uid, detail) {
             members: [uid],
             posts: [],
         }, err => {
-
+            if(err) {
+                var result = {
+                    result: false,
+                    category: 'group',
+                    action: 'CREATE'
+                }
+                callback(JSON.stringify(result))
+            } else {
+                var result = {
+                    result: true,
+                    category: 'group',
+                    action: 'CREATE',
+                    detail: JSON.stringify({
+                        gname: detail.name,
+                        gid: gid
+                    })
+                }
+                callback(JSON.stringify(result))
+            }
         })
     } else if(subaction == 'GET') {
-        return ref.child('group').get(gid)
+        ref.child('group').get(gid, err => {
+            if(err) {
+                var result = {
+                    result: false,
+                    category: 'group',
+                    action: 'GET'
+                }
+                callback(JSON.stringify(result))
+            } else {
+                var result = {
+                    result: true,
+                    category: 'group',
+                    action: 'GET',
+                    detail: JSON.stringify({
+                        gname: detail.name,
+                        gid: gid,
+                        members: detail.members,
+                        posts: detail.posts
+                    })
+                }
+            }
+        })
     } else if(subaction == 'SIGNUP') {
         var groupInfo = ref.child('group').child(gid).get()
         groupInfo.members.add(uid)
